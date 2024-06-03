@@ -1,0 +1,31 @@
+﻿@model Feedback
+@{
+    ViewData["Title"] = "Detail";
+}
+
+<div class="text-center">
+    <div class="container">
+        <div>
+            <div scope="row">@Model.Index</div>
+            <div>
+                @switch (Model.Emotion)
+                {
+                    case Feedback.EmotionType.Happy:
+                        <img width="64px" height="64px" src="/images/happy.webp"></img>
+                        break;
+                    case Feedback.EmotionType.Angry:
+                        <img width="64px" height="64px" src="/images/angry.webp"></img>
+                        break;
+                    case Feedback.EmotionType.Neutral:
+                        <img width="64px" height="64px" src="/images/neutral.webp"></img>
+                        break;
+                    default:
+                        break;
+                }
+
+
+            </div>
+            <div>@Model.Description</div>
+            <div>@Model.CreatedTime</div>
+        </div>
+    </div>

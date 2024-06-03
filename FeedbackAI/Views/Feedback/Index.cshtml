@@ -1,0 +1,68 @@
+﻿@model FeedbackViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <div class="container">
+        <form method="get" asp-action="Index">
+            <div class="form-group">
+                <select asp-for="SearchEmotionType" class="form-select" aria-label="Default select example">
+                    <option value=0 selected>All</option>
+                    <option value=1>Angry</option>
+                    <option value=2>Happy</option>
+                    <option value=3>Neutral</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <div class="form-group">
+                    <label asp-for="SearchString">Feedback</label>
+                    <textarea class="form-control" asp-for="SearchString" rows="3"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Emotion</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Feedbacks)
+                {
+                    <tr>
+                        <th scope="row">@item.Index</th>
+                        <td>
+                            @switch (item.Emotion)
+                            {
+                                case Feedback.EmotionType.Happy:
+                                    <img width="64px" height="64px" src="/images/happy.webp"></img>
+                                    break;
+                                case Feedback.EmotionType.Angry:
+                                    <img width="64px" height="64px" src="/images/angry.webp"></img>
+                                    break;
+                                case Feedback.EmotionType.Neutral:
+                                    <img width="64px" height="64px" src="/images/neutral.webp"></img>
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                        <td>@item.Description</td>
+                        <td>@item.CreatedTime</td>
+                        <td>
+                            <a type="btn" asp-controller="Feedback" asp-action="Detail" asp-route-id="@item.Index">View</a>
+                            
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
