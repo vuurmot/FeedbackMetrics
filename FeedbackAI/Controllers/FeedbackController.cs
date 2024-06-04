@@ -1,5 +1,7 @@
 ﻿using FeedbackAI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using static FeedbackAI.Models.Feedback;
 using static FeedbackAI.Models.FeedbackViewModel;
@@ -16,7 +18,7 @@ namespace FeedbackAI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(EmotionType searchEmotionType, string searchCategory,string searchString, SearchDates searchDate)
+        public async Task<IActionResult> Index(EmotionType searchEmotionType, string searchCategory, string searchString, SearchDates searchDate)
         {
             FeedbackViewModel model = new FeedbackViewModel();
             var feedbacks = applicationDBContext.Feedbacks.ToList();
@@ -32,7 +34,7 @@ namespace FeedbackAI.Controllers
             {
                 feedbacks = feedbacks.FindAll(item => item.Category == searchCategory);
             }
-            if(searchDate != SearchDates.Empty)
+            if (searchDate != SearchDates.Empty)
             {
                 DateTime evaluateDate = DateTime.Now;
                 switch (searchDate)
@@ -77,6 +79,22 @@ namespace FeedbackAI.Controllers
             Feedback feedback = applicationDBContext.Feedbacks.FirstOrDefault(item => item.Index == id);
             return View(feedback);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCharts()
+        {
+            var feedbacks = applicationDBContext.Feedbacks.OrderBy(item => item.CreatedTime);
+            var dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy"));
+            var emotions = feedbacks.Select(item => item.Emotion);
+
+            var countException = feedbacks.ToArray();
+            return new JsonResult(new { dates, emotions });
+        }
+        public IActionResult Charts()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

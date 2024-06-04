@@ -1,0 +1,87 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<canvas id="canvas" width="400" height="400"></canvas>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js" integrity="sha256-qSIshlknROr4J8GMHRlW3fGKrPki733tLq+qeMCR05Q=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" integrity="sha256-IvM9nJf/b5l2RoebiFno92E5ONttVyaEEsdemDC6iQA=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js" integrity="sha256-arMsf+3JJK2LoTGqxfnuJPFTU4hAK57MtIPdFpiHXOU=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
+    <script>
+        function GetJSON_Simple() {
+            var resp = [];
+            $.ajax({
+                type: "GET",
+                url: '/Feedback/GetCharts',
+                async: false,
+                contentType: "application/json",
+                success: function (data) {
+                    resp.push(data);
+                },
+                error: function (req, status, error) {
+                    // do something with error
+                    alert("error");
+                }
+            });
+            return resp;
+        }
+        var simpleData = GetJSON_Simple();
+        var ctx = document.getElementById("canvas")
+        var lineChartData = {
+            labels: simpleData[0].dates,
+            datasets: [{
+                label: 'Sucess',
+                borderColor: "MediumSeaGreen",
+                backgroundColor: "MediumSeaGreen",
+                fill: false,
+                data: simpleData[0].emotions,
+                yAxisID: 'y-axis-1',
+            }, 
+            // {
+            //     label: 'Exceptioned',
+            //     borderColor: "Tomato",
+            //     backgroundColor: "Tomato",
+            //     fill: false,
+            //     data: simpleData[0].myException,
+            //     yAxisID: 'y-axis-2'
+            // }
+            ]
+        };
+
+        window.myLine = Chart.Line(ctx, {
+            data: lineChartData,
+            options: {
+                responsive: true,
+                hoverMode: 'index',
+                stacked: false,
+                title: {
+                    display: true,
+                    text: 'Processes'
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        id: 'y-axis-1',
+                    }, {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        id: 'y-axis-2',
+
+                        // grid line settings
+                        gridLines: {
+                            drawOnChartArea: false, // only want the grid lines for one axis to show up
+                        },
+                    }],
+                }
+            }
+        });
+
+    </script>
+}
