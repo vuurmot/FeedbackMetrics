@@ -30,9 +30,14 @@
             </div>
             <div class="form-group">
                 <div class="form-group">
-                    <label asp-for="Category">Feedback</label>
-                    <textarea class="form-control" asp-for="Category" rows="3"></textarea>
-                    <span asp-validation-for="Category" class="text-danger"></span>
+                    <label asp-for="Category">Category</label>
+                    <select asp-for="Category" class="form-select" aria-label="Default select example">
+                        <option value="All" selected>All</option>
+                        <option value="Bug">Bug</option>
+                        <option value="Gameplay">Gameplay</option>
+                        <option value="Others">Others</option>
+                    </select>
+
                 </div>
             </div>
             <div class="form-group">
@@ -42,7 +47,7 @@
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="mt-1 btn btn-primary">Submit</button>
         </form>
     </div>
 </div>
