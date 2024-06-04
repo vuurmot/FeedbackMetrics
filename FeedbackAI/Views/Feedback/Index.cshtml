@@ -6,27 +6,59 @@
 <div class="text-center">
     <div class="container">
         <form method="get" asp-action="Index">
-            <div class="form-group">
-                <select asp-for="SearchEmotionType" class="form-select" aria-label="Default select example">
-                    <option value=0 selected>All</option>
-                    <option value=1>Angry</option>
-                    <option value=2>Happy</option>
-                    <option value=3>Neutral</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <div class="form-group">
-                    <label asp-for="SearchString">Feedback</label>
-                    <textarea class="form-control" asp-for="SearchString" rows="3"></textarea>
+            <div class="container">
+                <div>Query</div>
+                <div class="row text-start">
+                    <div class="col-sm">
+                        <label asp-for="SearchEmotionType">Emotion</label>
+                        <select asp-for="SearchEmotionType" class="form-select" aria-label="Default select example">
+                            <option value=0 selected>All</option>
+                            <option value=1>Angry</option>
+                            <option value=2>Happy</option>
+                            <option value=3>Neutral</option>
+                        </select>
+                    </div>
+                    <div class="col-sm">
+                        <label asp-for="SearchCategory">Category</label>
+                        <select asp-for="SearchCategory" class="form-select" aria-label="Default select example">
+                            <option value="All" selected>All</option>
+                            <option value="Bug">Bug</option>
+                            <option value="Gameplay">Gameplay</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                    <div class="col-sm">
+                        <label asp-for="SearchDate" class="control-label"></label>
+                        <select asp-for="SearchDate" class="form-select" aria-label="Default select example">
+                            <option value=0 selected>All</option>
+                            <option value=1>Past 1 Year</option>
+                            <option value=2>Past 1 Month</option>
+                            <option value=3>Past 1 Week</option>
+                            <option value=4>Past 1 Day</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row text-start">
+                    <div class="col-sm">
+                        <label asp-for="SearchString">Feedback</label>
+                        <input class="form-control" asp-for="SearchString" rows="3"></input>
+                    </div>
+                </div>
+                <div class="row text-start">
+                    <div class="col-sm">
+                        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                    </div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+
+
         </form>
         <table class="table">
             <thead>
                 <tr>
                     <th scope="col">ID</th>
                     <th scope="col">Emotion</th>
+                    <th scope="col">Category</th>
                     <th scope="col">Description</th>
                     <th scope="col">Date</th>
                     <th scope="col">Actions</th>
@@ -52,12 +84,12 @@
                                 default:
                                     break;
                             }
-
+                        <td>@item.Category</td>
                         <td>@item.Description</td>
-                        <td>@item.CreatedTime</td>
+                        <td>@item.CreatedTime.ToString("dd/MM/yyyy")</td>
                         <td>
                             <a type="btn" asp-controller="Feedback" asp-action="Detail" asp-route-id="@item.Index">View</a>
-                            
+
                         </td>
                     </tr>
                 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using static FeedbackAI.Models.Feedback;
+using static FeedbackAI.Models.FeedbackViewModel;
 
 namespace FeedbackAI.Controllers
 {
@@ -15,7 +16,7 @@ namespace FeedbackAI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(EmotionType searchEmotionType, string searchString)
+        public async Task<IActionResult> Index(EmotionType searchEmotionType, string searchCategory,string searchString, SearchDates searchDate)
         {
             FeedbackViewModel model = new FeedbackViewModel();
             var feedbacks = applicationDBContext.Feedbacks.ToList();
@@ -23,9 +24,33 @@ namespace FeedbackAI.Controllers
             {
                 feedbacks = feedbacks.FindAll(item => item.Description.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
             }
-            if(searchEmotionType != EmotionType.Empty)
+            if (searchEmotionType != EmotionType.Empty)
             {
-                feedbacks = feedbacks.FindAll(item => item.Emotion == searchEmotionType); 
+                feedbacks = feedbacks.FindAll(item => item.Emotion == searchEmotionType);
+            }
+            if (!string.IsNullOrEmpty(searchCategory) && searchCategory != "All")
+            {
+                feedbacks = feedbacks.FindAll(item => item.Category == searchCategory);
+            }
+            if(searchDate != SearchDates.Empty)
+            {
+                DateTime evaluateDate = DateTime.Now;
+                switch (searchDate)
+                {
+                    case SearchDates.Past1Year:
+                        evaluateDate = evaluateDate.AddYears(-1);
+                        break;
+                    case SearchDates.Past1Month:
+                        evaluateDate = evaluateDate.AddMonths(-1);
+                        break;
+                    case SearchDates.Past1Week:
+                        evaluateDate = evaluateDate.AddDays(-7);
+                        break;
+                    case SearchDates.Past1Day:
+                        evaluateDate = evaluateDate.AddDays(-1);
+                        break;
+                }
+                feedbacks = feedbacks.FindAll(item => item.CreatedTime >= evaluateDate);
             }
             model.Feedbacks = feedbacks;
             return View(model);

@@ -9,6 +9,7 @@ namespace FeedbackAI.Models
         public enum EmotionType { Empty,Angry, Happy, Neutral, }
         public EmotionType Emotion { get; set; }
         public string Description { get; set; }
+        public string Category { get; set; }
 
         public DateTime CreatedTime { get; set; }
     }
