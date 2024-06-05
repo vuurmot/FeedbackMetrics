@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection.Metadata;
 using static FeedbackAI.Models.ChartsViewModel;
 using static FeedbackAI.Models.Feedback;
 using static FeedbackAI.Models.FeedbackViewModel;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FeedbackAI.Controllers
 {
@@ -84,10 +87,29 @@ namespace FeedbackAI.Controllers
         {
             ChartsViewModel model = new ChartsViewModel();
 
-            var feedbacks = applicationDBContext.Feedbacks.OrderBy(item => item.CreatedTime);
-            string[] dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy")).ToArray();
-            string[] emotions = feedbacks.Select(item => item.Emotion.ToString()).ToArray();
-      
+            var feedbacks = applicationDBContext.Feedbacks.ToList();
+            feedbacks = feedbacks.FindAll(item => item.CreatedTime >= DateTime.Now.AddMonths(-3));
+            DayEmotionData dayEmotionData = new DayEmotionData();
+            List<string> dates = new List<string>();
+            List<int> happyCount = new List<int>();
+            List<int> angryCount = new List<int>();
+            List<int> neutralCount = new List<int>();
+            
+            foreach (var feedback in feedbacks)
+            {
+                dates.Add(feedback.CreatedTime.ToString("dd/MM/yyyy"));
+                happyCount.Add(feedbacks.FindAll(item => item.CreatedTime.Date == feedback.CreatedTime.Date && item.Emotion == EmotionType.Angry).Count());
+                angryCount.Add(feedbacks.FindAll(item => item.CreatedTime.Date == feedback.CreatedTime.Date && item.Emotion == EmotionType.Happy).Count());
+                neutralCount.Add(feedbacks.FindAll(item => item.CreatedTime.Date == feedback.CreatedTime.Date && item.Emotion == EmotionType.Neutral).Count());
+            }
+            dayEmotionData.Dates = dates;
+            dayEmotionData.HappyEmotionCount = happyCount;
+            dayEmotionData.AngryEmotionCount = angryCount;
+            dayEmotionData.NeutralEmotionCount = neutralCount;
+
+            model.Past3MonthsEmotion = dayEmotionData;
+
+
             List<TopIssuesData> topIssues = new List<TopIssuesData>();
             topIssues.Add(new TopIssuesData() { IssueName = "Lag", IssueCount = 10 });
             topIssues.Add(new TopIssuesData() { IssueName = "Hackers", IssueCount = 50 });
@@ -95,26 +117,23 @@ namespace FeedbackAI.Controllers
             topIssues.Add(new TopIssuesData() { IssueName = "Bugs", IssueCount = 17 });
 
             List<TopIssuesData> orderedIssues = topIssues.OrderByDescending(item => item.IssueCount).ToList();
-            model.SentimentOverTime = new ChartsViewModel.SentimentOverTimeData()
-            {
-                Dates = dates,
-                Emotions = [1, 2, 6, 1]
-            };
+
+
 
             model.AllTimeData = new ChartsViewModel.GeneralData()
             {
                 TopIssues = orderedIssues,
-                AngryEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Angry).Count(),
-                HappyEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Happy).Count(),
-                NeutralEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Neutral).Count(),
+                AngryEmotionCount = feedbacks.FindAll(item => item.Emotion == EmotionType.Angry).Count(),
+                HappyEmotionCount = feedbacks.FindAll(item => item.Emotion == EmotionType.Happy).Count(),
+                NeutralEmotionCount = feedbacks.FindAll(item => item.Emotion == EmotionType.Neutral).Count(),
             };
             DateTime pastMonth = DateTime.Now.AddMonths(-1);
             model.Past30Data = new ChartsViewModel.GeneralData()
             {
                 TopIssues = orderedIssues,
-                AngryEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Angry && item.CreatedTime >= pastMonth).Count(),
-                HappyEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Happy && item.CreatedTime >= pastMonth).Count(),
-                NeutralEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Neutral && item.CreatedTime >= pastMonth).Count(),
+                AngryEmotionCount = feedbacks.FindAll(item => item.Emotion == EmotionType.Angry && item.CreatedTime >= pastMonth).Count(),
+                HappyEmotionCount = feedbacks.FindAll(item => item.Emotion == EmotionType.Happy && item.CreatedTime >= pastMonth).Count(),
+                NeutralEmotionCount = feedbacks.FindAll(item => item.Emotion == EmotionType.Neutral && item.CreatedTime >= pastMonth).Count(),
             };
             return View(model);
         }

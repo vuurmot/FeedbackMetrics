@@ -4,11 +4,14 @@ namespace FeedbackAI.Models
 {
     public class ChartsViewModel
     {
-        public struct SentimentOverTimeData
+        public struct DayEmotionData
         {
-            public string[] Dates;
-            public int[] Emotions;
+            public List<string> Dates;
+            public List<int> AngryEmotionCount;
+            public List<int> HappyEmotionCount;
+            public List<int> NeutralEmotionCount;
         }
+
         public struct TopIssuesData
         {
             public string IssueName;
@@ -21,8 +24,7 @@ namespace FeedbackAI.Models
             public int HappyEmotionCount;
             public int NeutralEmotionCount;
         }
-
-        public SentimentOverTimeData SentimentOverTime { get; set; }
+        public DayEmotionData Past3MonthsEmotion { get; set; }
         public GeneralData AllTimeData { get; set; }
         public GeneralData Past30Data { get; set; }
     }

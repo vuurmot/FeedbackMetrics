@@ -1,23 +1,19 @@
 ﻿@model ChartsViewModel
 <div class="container">
-    <canvas style="max-height: 400px; max-width:80%"  id="top-issues"></canvas>
+    <div class="mx-auto border border-1" style="max-width:80%">
+        <div class="p-3">Top Issues (Past 3 months)</div>
+        <div class="p-3">
+            <canvas style="max-height: 400px; " id="top-issues"></canvas>
+        </div>
 
-    <div class="row">
-        <div class="col-sm">
-            <img height="64px" width="64px" src="~/images/happy.webp" />
-            <p>@Model.AllTimeData.HappyEmotionCount</p>
-        </div>
-        <div class="col-sm">
-            <img height="64px" width="64px" src="~/images/angry.webp" />
-            <div>@Model.AllTimeData.AngryEmotionCount</div>
-        </div>
-        <div class="col-sm">
-            <img height="64px" width="64px" src="~/images/neutral.webp" />
-            <div>@Model.AllTimeData.NeutralEmotionCount</div>
-        </div>
     </div>
 
-    <canvas style="max-height: 400px; max-width:80%" id="sentiment-over-time" </canvas>
+    <div class="mx-auto border border-1" style="max-width:80%">
+        <div class="p-3">Sentiment over time (Past 3 months)</div>
+        <div class="p-3">
+            <canvas id="sentiment-over-time" </canvas>
+        </div>
+    </div>
 
 </div>
 
@@ -39,7 +35,7 @@
         {
             @:barJSONData2.push(@issue.IssueCount)
         }
-        var barChart = document.getElementById("top-issues");
+                                                var barChart = document.getElementById("top-issues");
         var barChartData = {
             labels: barJSONData1,
             datasets: [{
@@ -63,29 +59,59 @@
             }
         });
 
-        var lineJSONData1 = [];
-        var lineJSONData2 = [];
-        @foreach (var issue in Model.AllTimeData.TopIssues)
+        var stackedBarChartDataJSON1 = [];
+        var stackedBarChartDataJSON2 = [];
+        var stackedBarChartDataJSON3 = [];
+        var stackedBarChartDataJSON4 = [];
+        @foreach (var item in Model.Past3MonthsEmotion.Dates)
         {
-            @:lineJSONData1.push("@issue.IssueName")
+            @:stackedBarChartDataJSON1.push("@item")
         }
-        @foreach (var issue in Model.AllTimeData.TopIssues)
+        @foreach (var item in Model.Past3MonthsEmotion.HappyEmotionCount)
         {
-            @:lineJSONData2.push(@issue.IssueCount)
+            @:stackedBarChartDataJSON2.push("@item")
         }
-                var lineChart = document.getElementById("sentiment-over-time");
-        var lineChartData = {
-            labels: lineJSONData1,
-            datasets: [{
-                label: 'Issue Count',
-                data: lineJSONData2,
-            },
+        @foreach (var item in Model.Past3MonthsEmotion.AngryEmotionCount)
+        {
+            @:stackedBarChartDataJSON3.push("@item")
+        }
+        @foreach (var item in Model.Past3MonthsEmotion.NeutralEmotionCount)
+        {
+            @:stackedBarChartDataJSON4.push("@item")
+        }
+
+        var stackedBarChart = document.getElementById("sentiment-over-time");
+        var stackedBarChartData = {
+            labels: stackedBarChartDataJSON1,
+            datasets: [
+                {
+                    label: 'Positive Count',
+                    data: stackedBarChartDataJSON2,
+                },
+                {
+                    label: 'Negative Count',
+                    data: stackedBarChartDataJSON3,
+                },
+                {
+                    label: 'Neutral Count',
+                    data: stackedBarChartDataJSON4,
+                }
             ]
         };
-        const secondChart = new Chart(lineChart, {
-            type: 'line',
-            data: lineChartData,
-
+        const stackedChart = new Chart(stackedBarChart, {
+            type: 'bar',
+            data: stackedBarChartData,
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: true,
+                    },
+                    y: {
+                        stacked: true
+                    }
+                }
+            }
         });
     </script>
 }
