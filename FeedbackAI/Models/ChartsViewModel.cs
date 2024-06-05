@@ -9,9 +9,14 @@ namespace FeedbackAI.Models
             public string[] Dates;
             public int[] Emotions;
         }
+        public struct TopIssuesData
+        {
+            public string IssueName;
+            public int IssueCount;
+        }
         public struct GeneralData
         {
-            public List<string> TopIssues;
+            public List<TopIssuesData> TopIssues;
             public int AngryEmotionCount;
             public int HappyEmotionCount;
             public int NeutralEmotionCount;

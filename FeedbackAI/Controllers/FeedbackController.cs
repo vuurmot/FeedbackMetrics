@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using static FeedbackAI.Models.ChartsViewModel;
 using static FeedbackAI.Models.Feedback;
 using static FeedbackAI.Models.FeedbackViewModel;
 
@@ -86,14 +87,14 @@ namespace FeedbackAI.Controllers
             var feedbacks = applicationDBContext.Feedbacks.OrderBy(item => item.CreatedTime);
             string[] dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy")).ToArray();
             string[] emotions = feedbacks.Select(item => item.Emotion.ToString()).ToArray();
-            //var feedbacks = applicationDBContext.Feedbacks.ToList();
-            //var dates = feedbacks.Select(item => item.CreatedTime).Distinct();
-            //Dictionary<DateTime, int> sentimentOverTime = new Dictionary<DateTime, int>();
-            //foreach (var date in dates)
-            //{
-            //    sentimentOverTime.Add(date, feedbacks.FindAll(item => item.CreatedTime == date).Count);
-            //}
-            //return new JsonResult(sentimentOverTime.ToList());
+      
+            List<TopIssuesData> topIssues = new List<TopIssuesData>();
+            topIssues.Add(new TopIssuesData() { IssueName = "Lag", IssueCount = 10 });
+            topIssues.Add(new TopIssuesData() { IssueName = "Hackers", IssueCount = 50 });
+            topIssues.Add(new TopIssuesData() { IssueName = "Clipping", IssueCount = 176 });
+            topIssues.Add(new TopIssuesData() { IssueName = "Bugs", IssueCount = 17 });
+
+            List<TopIssuesData> orderedIssues = topIssues.OrderByDescending(item => item.IssueCount).ToList();
             model.SentimentOverTime = new ChartsViewModel.SentimentOverTimeData()
             {
                 Dates = dates,
@@ -102,7 +103,7 @@ namespace FeedbackAI.Controllers
 
             model.AllTimeData = new ChartsViewModel.GeneralData()
             {
-                TopIssues = ["Lag", "Slip"],
+                TopIssues = orderedIssues,
                 AngryEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Angry).Count(),
                 HappyEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Happy).Count(),
                 NeutralEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Neutral).Count(),
@@ -110,7 +111,7 @@ namespace FeedbackAI.Controllers
             DateTime pastMonth = DateTime.Now.AddMonths(-1);
             model.Past30Data = new ChartsViewModel.GeneralData()
             {
-                TopIssues = ["Lag", "Slip", "etc"],
+                TopIssues = orderedIssues,
                 AngryEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Angry && item.CreatedTime >= pastMonth).Count(),
                 HappyEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Happy && item.CreatedTime >= pastMonth).Count(),
                 NeutralEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Neutral && item.CreatedTime >= pastMonth).Count(),
