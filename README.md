@@ -15,3 +15,8 @@ Currently works with PostgreSQL databases.
 7. Run the main application
 
 
+# Demo
+![alt text](https://github.com/vuurmot/FeedbackMetrics/blob/main/1.PNG)
+![alt text](https://github.com/vuurmot/FeedbackMetrics/blob/main/1.2.PNG)
+![alt text](https://github.com/vuurmot/FeedbackMetrics/blob/main/2.PNG)
+![alt text](https://github.com/vuurmot/FeedbackMetrics/blob/main/3.PNG)
