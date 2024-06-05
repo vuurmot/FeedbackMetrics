@@ -79,16 +79,13 @@ namespace FeedbackAI.Controllers
             Feedback feedback = applicationDBContext.Feedbacks.FirstOrDefault(item => item.Index == id);
             return View(feedback);
         }
-
-        [HttpGet]
-        public async Task<IActionResult> GetMetrics()
+        public IActionResult Charts()
         {
+            ChartsViewModel model = new ChartsViewModel();
+
             var feedbacks = applicationDBContext.Feedbacks.OrderBy(item => item.CreatedTime);
-            var dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy"));
-            var emotions = feedbacks.Select(item => item.Emotion);
-            int angry = feedbacks.Select(item => item.Emotion == EmotionType.Angry).Count();
-            int happy = feedbacks.Select(item => item.Emotion == EmotionType.Happy).Count();
-            int neutral = feedbacks.Select(item => item.Emotion == EmotionType.Neutral).Count();
+            string[] dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy")).ToArray();
+            string[] emotions = feedbacks.Select(item => item.Emotion.ToString()).ToArray();
             //var feedbacks = applicationDBContext.Feedbacks.ToList();
             //var dates = feedbacks.Select(item => item.CreatedTime).Distinct();
             //Dictionary<DateTime, int> sentimentOverTime = new Dictionary<DateTime, int>();
@@ -97,59 +94,26 @@ namespace FeedbackAI.Controllers
             //    sentimentOverTime.Add(date, feedbacks.FindAll(item => item.CreatedTime == date).Count);
             //}
             //return new JsonResult(sentimentOverTime.ToList());
-            return new JsonResult(new
-            {
-                sentimentOverTime = new
-                {
-                    dates,
-                    emotions
-                },
-                emotionCount = new
-                {
-                    total = new
-                    {
-
-                        angry,
-                        happy,
-                        neutral,
-                    },
-                    past30 = new
-                    {
-
-                        angry,
-                        happy,
-                        neutral,
-                    }
-                },
-                topIssues = new
-                {
-                    total = new string[] { "Lag", "Clipping" },
-                    past30 = new string[] { "Lag", "Clipping" }
-                }
-            });
-        }
-        public IActionResult Charts()
-        {
-            ChartsViewModel model = new ChartsViewModel();
-
-            var feedbacks = applicationDBContext.Feedbacks.OrderBy(item => item.CreatedTime);
-            string[] dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy")).ToArray();
-            string[] emotions = feedbacks.Select(item => item.Emotion.ToString()).ToArray();
-            int angry = feedbacks.Select(item => item.Emotion == EmotionType.Angry).Count();
-            int happy = feedbacks.Select(item => item.Emotion == EmotionType.Happy).Count();
-            int neutral = feedbacks.Select(item => item.Emotion == EmotionType.Neutral).Count();
-
             model.SentimentOverTime = new ChartsViewModel.SentimentOverTimeData()
             {
                 Dates = dates,
                 Emotions = [1, 2, 6, 1]
             };
-            model.General = new ChartsViewModel.GeneralData()
+
+            model.AllTimeData = new ChartsViewModel.GeneralData()
             {
                 TopIssues = ["Lag", "Slip"],
-                AngryEmotionCount = angry,
-                HappyEmotionCount = happy,
-                NeutralEmotionCount = neutral,
+                AngryEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Angry).Count(),
+                HappyEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Happy).Count(),
+                NeutralEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Neutral).Count(),
+            };
+            DateTime pastMonth = DateTime.Now.AddMonths(-1);
+            model.Past30Data = new ChartsViewModel.GeneralData()
+            {
+                TopIssues = ["Lag", "Slip", "etc"],
+                AngryEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Angry && item.CreatedTime >= pastMonth).Count(),
+                HappyEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Happy && item.CreatedTime >= pastMonth).Count(),
+                NeutralEmotionCount = feedbacks.Select(item => item.Emotion == EmotionType.Neutral && item.CreatedTime >= pastMonth).Count(),
             };
             return View(model);
         }

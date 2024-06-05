@@ -1,22 +1,27 @@
 ﻿@model ChartsViewModel
-<div class="row">
-    <div class="col-8">
-        <img height="64px" width="64px" src="~/images/happy.webp"/>
-        <p>@Model.General.HappyEmotionCount</p>
-        <div></div>
+<div class="container">
+    <canvas id="top-issues" width="400" height="400"></canvas>
+
+    <div class="row">
+        <div class="col-sm">
+            <img height="64px" width="64px" src="~/images/happy.webp" />
+            <p>@Model.AllTimeData.HappyEmotionCount</p>
+        </div>
+        <div class="col-sm">
+            <img height="64px" width="64px" src="~/images/angry.webp" />
+            <div>@Model.AllTimeData.AngryEmotionCount</div>
+        </div>
+        <div class="col-sm">
+            <img height="64px" width="64px" src="~/images/neutral.webp" />
+            <div>@Model.AllTimeData.NeutralEmotionCount</div>
+        </div>
     </div>
-    <div class="col-8">
-        <img height="64px" width="64px" src="~/images/angry.webp" />
-        <div>@Model.General.AngryEmotionCount</div>
-    </div>
-    <div class="col-8">
-        <img height="64px" width="64px" src="~/images/neutral.webp" />
-        <div>@Model.General.NeutralEmotionCount</div>
-    </div>
-    <div> @Model.SentimentOverTime.Emotions[0]</div>
+    <canvas id="sentiment-over-time" width="400" height="400"></canvas>
+
 </div>
-<canvas id="canvas" width="400" height="400"></canvas>
+
 @section Scripts {
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js" integrity="sha256-qSIshlknROr4J8GMHRlW3fGKrPki733tLq+qeMCR05Q=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js" integrity="sha256-xKeoJ50pzbUGkpQxDYHD7o7hxe0LaOGeguUidbq6vis=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.css" integrity="sha256-IvM9nJf/b5l2RoebiFno92E5ONttVyaEEsdemDC6iQA=" crossorigin="anonymous" />
@@ -24,6 +29,78 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
     <script>
+
+        var barJSONData1 = [];
+        var barJSONData2 = [];
+        @foreach (var emotion in Model.SentimentOverTime.Emotions)
+        {
+            @:barJSONData1.push(@emotion)
+        }
+        @foreach (var date in Model.SentimentOverTime.Dates)
+        {
+            @:barJSONData2.push(@date)
+        }
+
+                               
+        var barChart = document.getElementById("top-issues")
+        var barChartData = {
+            labels: [5, 1, 3, 4],
+            datasets: [{
+                label: 'Positive1',
+                borderColor: "MediumSeaGreen",
+                backgroundColor: "MediumSeaGreen",
+                fill: false,
+                data: barJSONData1,
+                yAxisID: 'y-axis-1',
+            },
+            {
+                label: 'Negative',
+                borderColor: "Tomato",
+                backgroundColor: "Tomato",
+                fill: false,
+                data: barJSONData2,
+                yAxisID: 'y-axis-2'
+            }
+            ]
+        };
+
+        window.myBar = Chart.Bar(barChart, {
+            data: barChartData,
+            type: 'horizontalBar',
+
+            options: {
+                type: 'horizontalBar',
+
+                responsive: true,
+                hoverMode: 'index',
+                stacked: false,
+                title: {
+                    display: true,
+                    text: 'Sentiment over time'
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        id: 'y-axis-1',
+                    }, {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        id: 'y-axis-2',
+
+                        // grid line settings
+                        gridLines: {
+                            drawOnChartArea: false, // only want the grid lines for one axis to show up
+                        },
+                    }],
+                }
+            }
+        });
+
+
+
         var jsonData1 = [];
         var jsonData2 = [];
         @foreach (var emotion in Model.SentimentOverTime.Emotions)
@@ -34,7 +111,10 @@
         {
             @:jsonData2.push(@date)
         }
-        var ctx = document.getElementById("canvas")
+
+
+
+        var lineChart = document.getElementById("sentiment-over-time")
         var lineChartData = {
             labels: [5, 1, 3, 4],
             datasets: [{
@@ -44,7 +124,7 @@
                 fill: false,
                 data: jsonData1,
                 yAxisID: 'y-axis-1',
-            }, 
+            },
             {
                 label: 'Negative',
                 borderColor: "Tomato",
@@ -56,7 +136,7 @@
             ]
         };
 
-        window.myLine = Chart.Line(ctx, {
+        window.myLine = Chart.Line(lineChart, {
             data: lineChartData,
             options: {
                 responsive: true,

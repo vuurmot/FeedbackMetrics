@@ -18,6 +18,7 @@ namespace FeedbackAI.Models
         }
 
         public SentimentOverTimeData SentimentOverTime { get; set; }
-        public GeneralData General { get; set; }
+        public GeneralData AllTimeData { get; set; }
+        public GeneralData Past30Data { get; set; }
     }
 }
