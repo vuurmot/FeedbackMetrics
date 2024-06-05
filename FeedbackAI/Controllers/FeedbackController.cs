@@ -81,18 +81,77 @@ namespace FeedbackAI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCharts()
+        public async Task<IActionResult> GetMetrics()
         {
             var feedbacks = applicationDBContext.Feedbacks.OrderBy(item => item.CreatedTime);
             var dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy"));
             var emotions = feedbacks.Select(item => item.Emotion);
+            int angry = feedbacks.Select(item => item.Emotion == EmotionType.Angry).Count();
+            int happy = feedbacks.Select(item => item.Emotion == EmotionType.Happy).Count();
+            int neutral = feedbacks.Select(item => item.Emotion == EmotionType.Neutral).Count();
+            //var feedbacks = applicationDBContext.Feedbacks.ToList();
+            //var dates = feedbacks.Select(item => item.CreatedTime).Distinct();
+            //Dictionary<DateTime, int> sentimentOverTime = new Dictionary<DateTime, int>();
+            //foreach (var date in dates)
+            //{
+            //    sentimentOverTime.Add(date, feedbacks.FindAll(item => item.CreatedTime == date).Count);
+            //}
+            //return new JsonResult(sentimentOverTime.ToList());
+            return new JsonResult(new
+            {
+                sentimentOverTime = new
+                {
+                    dates,
+                    emotions
+                },
+                emotionCount = new
+                {
+                    total = new
+                    {
 
-            var countException = feedbacks.ToArray();
-            return new JsonResult(new { dates, emotions });
+                        angry,
+                        happy,
+                        neutral,
+                    },
+                    past30 = new
+                    {
+
+                        angry,
+                        happy,
+                        neutral,
+                    }
+                },
+                topIssues = new
+                {
+                    total = new string[] { "Lag", "Clipping" },
+                    past30 = new string[] { "Lag", "Clipping" }
+                }
+            });
         }
         public IActionResult Charts()
         {
-            return View();
+            ChartsViewModel model = new ChartsViewModel();
+
+            var feedbacks = applicationDBContext.Feedbacks.OrderBy(item => item.CreatedTime);
+            string[] dates = feedbacks.Select(item => item.CreatedTime.ToString("dd/MM/yyyy")).ToArray();
+            string[] emotions = feedbacks.Select(item => item.Emotion.ToString()).ToArray();
+            int angry = feedbacks.Select(item => item.Emotion == EmotionType.Angry).Count();
+            int happy = feedbacks.Select(item => item.Emotion == EmotionType.Happy).Count();
+            int neutral = feedbacks.Select(item => item.Emotion == EmotionType.Neutral).Count();
+
+            model.SentimentOverTime = new ChartsViewModel.SentimentOverTimeData()
+            {
+                Dates = dates,
+                Emotions = [1, 2, 6, 1]
+            };
+            model.General = new ChartsViewModel.GeneralData()
+            {
+                TopIssues = ["Lag", "Slip"],
+                AngryEmotionCount = angry,
+                HappyEmotionCount = happy,
+                NeutralEmotionCount = neutral,
+            };
+            return View(model);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
